@@ -28,3 +28,10 @@ class ComputrabajoSpider(CrawlSpider):
         yield item.load_item()
 
 # scrapy runspider multiplepages.py -o ../../resources/computrabajo.csv -t csv
+
+
+    """ def parse(self, response):
+        item = ItemLoader(item=Product(), response=response)
+        item.add_xpath("title", "//div[@class='item__info item--hide-right-col ']/h2/a/span/text()")
+        item.add_xpath("price", "//div[@class='item__info item--hide-right-col ']/div[@class='price__container']/div[@class='item__price ']/span[@class='price__fraction']/text()")
+        return item.load_item() """
