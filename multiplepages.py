@@ -1,37 +1,30 @@
-from scrapy.item import Item
-from scrapy.item import Field
-from scrapy.spiders import CrawlSpider, Rule
-from scrapy.contrib.loader import ItemLoader
-from scrapy.linkextractor import LinkExtractor
+import scrapy
 
 
-class Articulos(Item):
-    title = Field()
-    description = Field()
+class BlogSpider(scrapy.Spider):
+    name = 'blogspider'
+    start_urls = ['https://blog.scrapinghub.com']
+
+    def parse(self, response):
+        for title in response.css('.post-header>h2'):
+            yield {'title': title.css('a ::text').get()}
+        #funcion para hacer click en el articulo y continuar
+        #recomipando informacion en vista detalle
+        for next_page in response.css('a.next-posts-link'):
+            yield response.follow(next_page, self.parse)
 
 
-class ComputrabajoSpider(CrawlSpider):
-
-    name = "mi primer crowlspider"
-    start_urls = ['https://www.ve.computrabajo.com/ofertas-de-trabajo/']
-    allowed_domain = ['www.ve.computrabajo.com/']
-
-    rules = (
-    	    Rule(LinkExtractor(allow=r'p=')),
-            Rule(LinkExtractor(allow=r'/oferta-de-trabajo-de-'), callback='parse_items'),
-            )
-
-    def parse_items(self, response):
-        item = ItemLoader(Articulos(), response)     
-        item.add_xpath('title', '//*[@id="MainContainer"]/article/section[1]/div[1]/div/h2/text()')
-        item.add_xpath('description', '//*[@id="MainContainer"]/article/section[1]/div[2]/ul/li[3]/text()')
-        yield item.load_item()
-
-# scrapy runspider multiplepages.py -o ../../resources/computrabajo.csv -t csv
+# se ejecuta con el siguiente comando con el formato deseado
+# scrapy runspider onepage.py -o resources/blogs.json -t json
+# scrapy runspider onepage.py -o resources/blogs.csv -t csv
 
 
-    """ def parse(self, response):
-        item = ItemLoader(item=Product(), response=response)
-        item.add_xpath("title", "//div[@class='item__info item--hide-right-col ']/h2/a/span/text()")
-        item.add_xpath("price", "//div[@class='item__info item--hide-right-col ']/div[@class='price__container']/div[@class='item__price ']/span[@class='price__fraction']/text()")
-        return item.load_item() """
+
+
+
+
+        #for article in response.xpath("//div[@class='item__info item--hide-right-col ']"):
+            #yield {'title': article.response.xpath('/h2/a/span').get(),
+                   #'price': article.xpath(/h2/a/span.text()).extract(),
+                   #'location': article.xpath(/h2/a/span.text()
+                  #}
